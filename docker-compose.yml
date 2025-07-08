@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  flashcard-db:
+    image: mongo:latest
+    container_name: flashcard-db
+    ports:
+      - "27011:27017"
+    volumes:
+      - flashcard-db:/data/db
+    networks:
+      - flashcard-network
+
+networks:
+  flashcard-network:
+    driver: bridge
+
+volumes:
+  flashcard-db:
