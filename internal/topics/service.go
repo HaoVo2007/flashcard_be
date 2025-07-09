@@ -13,7 +13,7 @@ type TopicService interface {
 	CreateTopic(c context.Context, req *CreateTopicRequest, userID string) error
 	GetAllTopics(c context.Context) ([]*Topic, error)
 	GetTopicByID(c context.Context, id string) (*TopicResponse, error)
-	GetTopicsByUserID(c context.Context, userID string) ([]*Topic, error)
+	GetTopicsByUserID(c context.Context, userID string) ([]*TopicResponse, error)
 	UpdateTopic(c context.Context, id string, req *UpdateTopicRequest) error
 	DeleteTopic(c context.Context, id string) error
 }
@@ -102,7 +102,7 @@ func (s *topicService) GetTopicByID(c context.Context, id string) (*TopicRespons
 	return res, nil
 }
 
-func (s *topicService) GetTopicsByUserID(c context.Context, userID string) ([]*Topic, error) {
+func (s *topicService) GetTopicsByUserID(c context.Context, userID string) ([]*TopicResponse, error) {
 	
 	if userID == "" {
 		return nil, fmt.Errorf("user id is required")
@@ -113,8 +113,32 @@ func (s *topicService) GetTopicsByUserID(c context.Context, userID string) ([]*T
 		return nil, err
 	}
 
-	return s.topicRepository.GetTopicsByUserID(c, objectID)
-	
+	topics, err := s.topicRepository.GetTopicsByUserID(c, objectID)
+	if err != nil {
+		return nil, err
+	}
+	var result []*TopicResponse
+	for _, topic := range topics {
+		works, err := s.wordService.GetWordsByTopicID(c, topic.ID.Hex())
+		if err != nil {
+			return nil, err
+		}
+
+		res := &TopicResponse{
+			ID:               topic.ID,
+			TopicName:        topic.TopicName,
+			TopicDescription: topic.TopicDescription,
+			Color:            topic.Color,
+			UserID:           topic.UserID,
+			CreatedAt:        topic.CreatedAt,
+			UpdatedAt:        topic.UpdatedAt,
+			WordCount:        len(works),
+		}
+
+		result = append(result, res)
+	}
+
+	return result, nil
 }
 
 func (s *topicService) UpdateTopic(c context.Context, id string, req *UpdateTopicRequest) error {
