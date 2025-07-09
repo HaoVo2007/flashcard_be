@@ -7,6 +7,7 @@ import (
 	"flashcard/internal/user"
 	"flashcard/internal/words"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -43,30 +44,28 @@ func main() {
 
 	r := gin.Default()
 
-	r.Use(func(c *gin.Context) {
+r.Use(func(c *gin.Context) {
 		origin := c.GetHeader("Origin")
 		log.Printf("Request from origin: '%s'", origin)
 		log.Printf("Request method: %s", c.Request.Method)
 		log.Printf("Request path: %s", c.Request.URL.Path)
-		c.Next()
-	})
-
-	r.Use(func(c *gin.Context) {
 		
+		// Set CORS headers for all requests
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH")
-		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization, Accept, X-Requested-With")
+		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization, Accept, X-Requested-With, Cache-Control")
 		c.Header("Access-Control-Max-Age", "86400")
+		c.Header("Access-Control-Allow-Credentials", "true")
 
+		// Handle preflight OPTIONS requests
 		if c.Request.Method == "OPTIONS" {
-			log.Printf("Handling OPTIONS preflight request")
-			c.AbortWithStatus(200)
+			log.Printf("Handling OPTIONS preflight request for path: %s", c.Request.URL.Path)
+			c.AbortWithStatus(http.StatusOK)
 			return
 		}
 
 		c.Next()
 	})
-
 	userCollections := mongoClient.Database("flashcard").Collection("users")
 	userRepository := user.NewUserRepository(userCollections)
 	userService := user.NewUserService(userRepository)
