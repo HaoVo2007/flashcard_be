@@ -13,6 +13,8 @@ type WordRepository interface{
 	GetAllWords(c context.Context) ([]*Word, error)
 	GetWordByID(c context.Context, id primitive.ObjectID) (*Word, error)
 	GetWordsByTopicID(c context.Context, id primitive.ObjectID) ([]*Word, error)
+	UpdateWord(c context.Context, id primitive.ObjectID, word *Word) error
+	DeleteWord(c context.Context, id primitive.ObjectID) error
 }
 
 type wordRepository struct {
@@ -93,4 +95,23 @@ func (r *wordRepository) GetWordsByTopicID(c context.Context, id primitive.Objec
 	
 	return words, nil
 
+}
+
+func (r *wordRepository) UpdateWord(c context.Context, id primitive.ObjectID, word *Word) error {
+	filter := bson.M{"_id": id}
+	update := bson.M{"$set": word}
+	_, err := r.collection.UpdateOne(c, filter, update)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *wordRepository) DeleteWord(c context.Context, id primitive.ObjectID) error {
+	filter := bson.M{"_id": id}
+	_, err := r.collection.DeleteOne(c, filter)
+	if err != nil {
+		return err
+	}
+	return nil
 }

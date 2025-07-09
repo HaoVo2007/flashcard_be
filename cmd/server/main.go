@@ -72,15 +72,15 @@ func main() {
 	userService := user.NewUserService(userRepository)
 	userHandler := user.NewUserHandler(userService)
 
-	topicCollections := mongoClient.Database("flashcard").Collection("topics")
-	topicRepository := topics.NewTopicRepository(topicCollections)
-	topicService := topics.NewTopicService(topicRepository)
-	topicHandler := topics.NewTopicHandler(topicService)
-
 	wordsCollections := mongoClient.Database("flashcard").Collection("words")
 	wordsRepository := words.NewWordRepository(wordsCollections)
 	wordsService := words.NewWordService(wordsRepository)
 	wordsHandler := words.NewWordHandler(wordsService)
+
+	topicCollections := mongoClient.Database("flashcard").Collection("topics")
+	topicRepository := topics.NewTopicRepository(topicCollections)
+	topicService := topics.NewTopicService(topicRepository, wordsService)
+	topicHandler := topics.NewTopicHandler(topicService)
 
 	words.RegisterRoutes(r, wordsHandler)
 	topics.RegisterRoutes(r, topicHandler)

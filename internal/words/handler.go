@@ -77,3 +77,37 @@ func (h *WordHandler) GetAllWordsByTopicID(c *gin.Context) {
 	helper.SendSuccess(c, http.StatusOK, "success", words)
 	
 }
+
+func (h *WordHandler) UpdateWord(c *gin.Context) {
+
+	id := c.Param("word_id")
+
+	var req UpdateWordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		helper.SendError(c, http.StatusBadRequest, err, helper.ErrInvalidRequest)
+		return
+	}
+
+	err := h.WordService.UpdateWord(c, id, &req)
+	if err != nil {
+		helper.SendError(c, http.StatusInternalServerError, err, helper.ErrInvalidOperation)
+		return
+	}
+
+	helper.SendSuccess(c, http.StatusOK, "success", nil)
+
+}
+
+func (h *WordHandler) DeleteWord(c *gin.Context) {
+
+	id := c.Param("word_id")
+
+	err := h.WordService.DeleteWord(c, id)
+	if err != nil {
+		helper.SendError(c, http.StatusInternalServerError, err, helper.ErrInvalidOperation)
+		return
+	}
+
+	helper.SendSuccess(c, http.StatusOK, "success", nil)
+	
+}

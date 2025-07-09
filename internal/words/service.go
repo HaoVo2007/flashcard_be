@@ -13,6 +13,8 @@ type WordService interface {
 	GetAllWords(c context.Context) ([]*Word, error)
 	GetWordByID(c context.Context, id string) (*Word, error)
 	GetWordsByTopicID(c context.Context, id string) ([]*Word, error)
+	UpdateWord(c context.Context, id string, req *UpdateWordRequest) error
+	DeleteWord(c context.Context, id string) error
 }
 
 type wordService struct {
@@ -24,7 +26,7 @@ func NewWordService(wordRepository WordRepository) WordService {
 }
 
 func (s *wordService) CreateWord(c context.Context, req *CreateWordRequest, userID string) error {
-	
+
 	if req.TopicID == "" {
 		return fmt.Errorf("topic id is required")
 	}
@@ -64,7 +66,7 @@ func (s *wordService) CreateWord(c context.Context, req *CreateWordRequest, user
 	}
 
 	return s.wordRepository.CreateWord(c, word)
-	
+
 }
 
 func (s *wordService) GetAllWords(c context.Context) ([]*Word, error) {
@@ -72,7 +74,7 @@ func (s *wordService) GetAllWords(c context.Context) ([]*Word, error) {
 }
 
 func (s *wordService) GetWordByID(c context.Context, id string) (*Word, error) {
-	
+
 	if id == "" {
 		return nil, fmt.Errorf("word id is required")
 	}
@@ -87,7 +89,7 @@ func (s *wordService) GetWordByID(c context.Context, id string) (*Word, error) {
 }
 
 func (s *wordService) GetWordsByTopicID(c context.Context, id string) ([]*Word, error) {
-	
+
 	if id == "" {
 		return nil, fmt.Errorf("topic id is required")
 	}
@@ -98,5 +100,55 @@ func (s *wordService) GetWordsByTopicID(c context.Context, id string) ([]*Word, 
 	}
 
 	return s.wordRepository.GetWordsByTopicID(c, objectID)
-	
+
+}
+
+func (s *wordService) UpdateWord(c context.Context, id string, req *UpdateWordRequest) error {
+
+	if id == "" {
+		return fmt.Errorf("word id is required")
+	}
+
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+
+	word, err := s.wordRepository.GetWordByID(c, objectID)
+	if err != nil {
+		return err
+	}
+
+	if req.Word != nil {
+		word.Word = *req.Word
+	}
+
+	if req.Definition != nil {
+		word.Definition = *req.Definition
+	}
+
+	if req.Example != nil {
+		word.Example = req.Example
+	}
+
+	if req.WordType != nil {
+		word.WordType = *req.WordType
+	}
+
+	return s.wordRepository.UpdateWord(c, objectID, word)
+}
+
+func (s *wordService) DeleteWord(c context.Context, id string) error {
+
+	if id == "" {
+		return fmt.Errorf("word id is required")
+	}
+
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+
+	return s.wordRepository.DeleteWord(c, objectID)
+
 }
