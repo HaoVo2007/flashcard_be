@@ -50,14 +50,12 @@ r.Use(func(c *gin.Context) {
 		log.Printf("Request method: %s", c.Request.Method)
 		log.Printf("Request path: %s", c.Request.URL.Path)
 		
-		// Set CORS headers for all requests
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH")
 		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization, Accept, X-Requested-With, Cache-Control")
 		c.Header("Access-Control-Max-Age", "86400")
 		c.Header("Access-Control-Allow-Credentials", "true")
 
-		// Handle preflight OPTIONS requests
 		if c.Request.Method == "OPTIONS" {
 			log.Printf("Handling OPTIONS preflight request for path: %s", c.Request.URL.Path)
 			c.AbortWithStatus(http.StatusOK)
