@@ -13,6 +13,8 @@ type TopicResponse struct {
 	Color            string             `json:"color" bson:"color"`
 	UserID           primitive.ObjectID `json:"user_id" bson:"user_id"`
 	WordCount        int                `json:"word_count" bson:"word_count"`
+	UnWordCount      int                `json:"un_word_count" bson:"un_word_count"`
+	PercentCompeted  float64            `json:"percent_competed" bson:"percent_competed"`
 	CreatedAt        time.Time          `json:"created_at" bson:"created_at"`
 	UpdatedAt        time.Time          `json:"updated_at" bson:"updated_at"`
 }

@@ -10,9 +10,9 @@ import (
 
 type WordRepository interface{
 	CreateWord(c context.Context, word *Word) error
-	GetAllWords(c context.Context) ([]*Word, error)
+	GetAllWords(c context.Context, req *SearchWordRequest) ([]*Word, error)
 	GetWordByID(c context.Context, id primitive.ObjectID) (*Word, error)
-	GetWordsByTopicID(c context.Context, id primitive.ObjectID) ([]*Word, error)
+	GetWordsByTopicID(c context.Context, id primitive.ObjectID, req *SearchWordRequest) ([]*Word, error)
 	UpdateWord(c context.Context, id primitive.ObjectID, word *Word) error
 	DeleteWord(c context.Context, id primitive.ObjectID) error
 }
@@ -33,11 +33,22 @@ func (r *wordRepository) CreateWord(c context.Context, word *Word) error {
 	return nil
 }
 
-func (r *wordRepository) GetAllWords(c context.Context) ([]*Word, error) {
+func (r *wordRepository) GetAllWords(c context.Context, req *SearchWordRequest) ([]*Word, error) {
 
 	var words []*Word
-	
-	cursor, err := r.collection.Find(c, bson.M{})
+
+	filter := bson.M{}
+	if req.Istrue != nil {
+		filter["is_true"] = *req.Istrue
+	}
+	if req.TopicID != nil {
+		filter["topic_id"] = *req.TopicID
+	}
+	if req.Word != nil {
+		filter["word"] = *req.Word
+	}
+
+	cursor, err := r.collection.Find(c, filter)
 	if err != nil {
 		return nil, err
 	}
@@ -73,9 +84,17 @@ func (r *wordRepository) GetWordByID(c context.Context, id primitive.ObjectID) (
 
 }
 
-func (r *wordRepository) GetWordsByTopicID(c context.Context, id primitive.ObjectID) ([]*Word, error) {
+func (r *wordRepository) GetWordsByTopicID(c context.Context, id primitive.ObjectID, req *SearchWordRequest) ([]*Word, error) {
 	
 	filter := bson.M{"topic_id": id}
+	
+	if req.Word != nil {
+		filter["word"] = *req.Word
+	}
+
+	if req.Istrue != nil {
+		filter["is_true"] = *req.Istrue
+	}
 	
 	var words []*Word
 	

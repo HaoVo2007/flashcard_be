@@ -39,8 +39,15 @@ func (h *WordHandler) CreateWord(c *gin.Context) {
 }
 
 func (h *WordHandler) GetAllWords(c *gin.Context) {
+	
+	var req SearchWordRequest
+	
+	if err := c.ShouldBindQuery(&req); err != nil {
+		helper.SendError(c, http.StatusBadRequest, err, helper.ErrInvalidRequest)
+		return
+	}
 
-	words, err := h.WordService.GetAllWords(c)
+	words, err := h.WordService.GetAllWords(c, &req)
 	if err != nil {
 		helper.SendError(c, http.StatusInternalServerError, err, helper.ErrInvalidOperation)
 		return
@@ -66,9 +73,16 @@ func (h *WordHandler) GetWordByID(c *gin.Context) {
 
 func (h *WordHandler) GetAllWordsByTopicID(c *gin.Context) {
 
+	var req SearchWordRequest
+	
+	if err := c.ShouldBindQuery(&req); err != nil {
+		helper.SendError(c, http.StatusBadRequest, err, helper.ErrInvalidRequest)
+		return
+	}
+
 	id := c.Param("topic_id")
 
-	words, err := h.WordService.GetWordsByTopicID(c, id)
+	words, err := h.WordService.GetWordsByTopicID(c, id, &req)
 	if err != nil {
 		helper.SendError(c, http.StatusInternalServerError, err, helper.ErrInvalidOperation)
 		return

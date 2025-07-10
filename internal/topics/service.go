@@ -83,7 +83,11 @@ func (s *topicService) GetTopicByID(c context.Context, id string) (*TopicRespons
 		return nil, err
 	}
 
-	works, err := s.wordService.GetWordsByTopicID(c, topic.ID.Hex())
+	works, err := s.wordService.GetWordsByTopicID(c, topic.ID.Hex(), &words.SearchWordRequest{
+		Word: nil,
+		Istrue: nil,
+	})
+
 	if err != nil {
 		return nil, err
 	}
@@ -117,9 +121,21 @@ func (s *topicService) GetTopicsByUserID(c context.Context, userID string) ([]*T
 	if err != nil {
 		return nil, err
 	}
+	isTrue := true
 	var result []*TopicResponse
 	for _, topic := range topics {
-		works, err := s.wordService.GetWordsByTopicID(c, topic.ID.Hex())
+		req := &words.SearchWordRequest{
+			Word: nil,
+			Istrue: &isTrue,
+		}
+		completedWords, err := s.wordService.GetWordsByTopicID(c, topic.ID.Hex(), req)
+		if err != nil {
+			return nil, err
+		}
+		allWords, err := s.wordService.GetWordsByTopicID(c, topic.ID.Hex(), &words.SearchWordRequest{
+			Word: nil,
+			Istrue: nil,
+		})
 		if err != nil {
 			return nil, err
 		}
@@ -132,7 +148,9 @@ func (s *topicService) GetTopicsByUserID(c context.Context, userID string) ([]*T
 			UserID:           topic.UserID,
 			CreatedAt:        topic.CreatedAt,
 			UpdatedAt:        topic.UpdatedAt,
-			WordCount:        len(works),
+			WordCount:        len(allWords),
+			UnWordCount:      len(allWords) - len(completedWords),
+			PercentCompeted:  float64(len(completedWords)) / float64(len(allWords)) * 100,
 		}
 
 		result = append(result, res)
@@ -184,7 +202,10 @@ func (s *topicService) DeleteTopic(c context.Context, id string) error {
 		return err
 	}
 
-	words, err := s.wordService.GetWordsByTopicID(c, id)
+	words, err := s.wordService.GetWordsByTopicID(c, id, &words.SearchWordRequest{
+		Word: nil,
+		Istrue: nil,
+	})
 	if err != nil {
 		return err
 	}

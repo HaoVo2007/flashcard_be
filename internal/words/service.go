@@ -10,9 +10,9 @@ import (
 
 type WordService interface {
 	CreateWord(c context.Context, req *CreateWordRequest, userID string) error
-	GetAllWords(c context.Context) ([]*Word, error)
+	GetAllWords(c context.Context, req *SearchWordRequest) ([]*Word, error)
 	GetWordByID(c context.Context, id string) (*Word, error)
-	GetWordsByTopicID(c context.Context, id string) ([]*Word, error)
+	GetWordsByTopicID(c context.Context, id string, req *SearchWordRequest) ([]*Word, error)
 	UpdateWord(c context.Context, id string, req *UpdateWordRequest) error
 	DeleteWord(c context.Context, id string) error
 }
@@ -60,6 +60,7 @@ func (s *wordService) CreateWord(c context.Context, req *CreateWordRequest, user
 		Word:       req.Word,
 		Definition: req.Definition,
 		Example:    req.Example,
+		IsTrue:     false,
 		WordType:   req.WordType,
 		CreatedAt:  time.Now(),
 		UpdatedAt:  time.Now(),
@@ -69,8 +70,8 @@ func (s *wordService) CreateWord(c context.Context, req *CreateWordRequest, user
 
 }
 
-func (s *wordService) GetAllWords(c context.Context) ([]*Word, error) {
-	return s.wordRepository.GetAllWords(c)
+func (s *wordService) GetAllWords(c context.Context, req *SearchWordRequest) ([]*Word, error) {
+	return s.wordRepository.GetAllWords(c, req)
 }
 
 func (s *wordService) GetWordByID(c context.Context, id string) (*Word, error) {
@@ -88,7 +89,7 @@ func (s *wordService) GetWordByID(c context.Context, id string) (*Word, error) {
 
 }
 
-func (s *wordService) GetWordsByTopicID(c context.Context, id string) ([]*Word, error) {
+func (s *wordService) GetWordsByTopicID(c context.Context, id string, req *SearchWordRequest) ([]*Word, error) {
 
 	if id == "" {
 		return nil, fmt.Errorf("topic id is required")
@@ -99,7 +100,7 @@ func (s *wordService) GetWordsByTopicID(c context.Context, id string) ([]*Word, 
 		return nil, err
 	}
 
-	return s.wordRepository.GetWordsByTopicID(c, objectID)
+	return s.wordRepository.GetWordsByTopicID(c, objectID, req)
 
 }
 
@@ -133,6 +134,10 @@ func (s *wordService) UpdateWord(c context.Context, id string, req *UpdateWordRe
 
 	if req.WordType != nil {
 		word.WordType = *req.WordType
+	}
+
+	if req.IsTrue != nil {
+		word.IsTrue = *req.IsTrue
 	}
 
 	return s.wordRepository.UpdateWord(c, objectID, word)

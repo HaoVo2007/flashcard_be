@@ -12,8 +12,9 @@ type Word struct {
 	UserID     primitive.ObjectID `json:"user_id" bson:"user_id"`
 	Word       string             `json:"word" bson:"word"`
 	Definition string             `json:"definition" bson:"definition"`
-	Example    *string             `json:"example" bson:"example"`
+	Example    *string            `json:"example" bson:"example"`
 	WordType   string             `json:"word_type" bson:"word_type"`
+	IsTrue     bool               `json:"is_true" bson:"is_true"`
 	CreatedAt  time.Time          `json:"created_at" bson:"created_at"`
 	UpdatedAt  time.Time          `json:"updated_at" bson:"updated_at"`
 }
