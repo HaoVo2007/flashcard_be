@@ -139,7 +139,10 @@ func (s *topicService) GetTopicsByUserID(c context.Context, userID string) ([]*T
 		if err != nil {
 			return nil, err
 		}
-
+		percentCompleted := 0.0
+		if len(allWords) > 0 {
+			percentCompleted = float64(len(completedWords)) / float64(len(allWords)) * 100
+		}
 		res := &TopicResponse{
 			ID:               topic.ID,
 			TopicName:        topic.TopicName,
@@ -150,7 +153,7 @@ func (s *topicService) GetTopicsByUserID(c context.Context, userID string) ([]*T
 			UpdatedAt:        topic.UpdatedAt,
 			WordCount:        len(allWords),
 			UnWordCount:      len(allWords) - len(completedWords),
-			PercentCompeted:  float64(len(completedWords)) / float64(len(allWords)) * 100,
+			PercentCompeted:  percentCompleted,
 		}
 
 		result = append(result, res)
